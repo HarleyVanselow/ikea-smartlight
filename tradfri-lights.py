@@ -31,7 +31,7 @@ import argparse
 
 from tradfri import tradfriActions
 
-def parse_args():
+def parse_args(a):
     """ function for getting parsed arguments """
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--action', choices=['power', 'brightness', 'color'], required=True)
@@ -41,13 +41,13 @@ def parse_args():
                         help='power: on/off, brightness: 0-100, color: warm/normal/cold',
                         required=True)
 
-    args = parser.parse_args()
+    args = parser.parse_args(a)
 
     return args
 
-def main():
+def main(cmdArgs):
     """ main function """
-    args = parse_args()
+    args = parse_args(cmdArgs)
     conf = ConfigParser.ConfigParser()
     conf.read('tradfri.cfg')
 
@@ -74,5 +74,5 @@ def main():
             sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
     sys.exit(0)
