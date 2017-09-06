@@ -1,8 +1,9 @@
 import time
 import BaseHTTPServer
 import simplejson
-
+import ConfigParser
 controller=__import__('tradfri-lights')
+status=__import__('tradfri-status')
 def mapLights(groupName):
         lights = []
         groups = props.get('group')
@@ -12,6 +13,12 @@ def mapLights(groupName):
                 else:
                         lights+=mapLights(id)
         return lights
+def printStatusPage(bulbInfo,outputWriter):
+	page = ""
+	for bulb in bulbInfo:
+		page+="<p>"+str(bulb['name'])+": "+str(bulb['brightness'])+"</p><br>"
+	outputWriter(page)
+	
 def readServerConfig():
 	lines = open("server.cfg","r").readlines()
 	readMode = ""
@@ -39,6 +46,21 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
+    def do_GET(self):
+	print("Received GET request")
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+	conf = ConfigParser.ConfigParser()
+        conf.read('tradfri.cfg')
+        hubip = conf.get('tradfri', 'hubip')
+        securityid = conf.get('tradfri', 'securityid')	
+	bulbStatuses = status.getBulbInfoObject(hubip,securityid)
+	self.wfile.write("<html><head><title>Harley Basement Lights Status Page</title></head>")
+	printStatusPage(bulbStatuses,self.wfile.write)
+	print("Done retreiving status")
+        self.send_response(200)
+        self.end_headers()
     def do_POST(self):
         """Respond to a GET request."""
         self.send_response(200)
@@ -59,7 +81,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	groupName = props.get('langmap').get(data.get('group').lower())
 	groups = props.get('group')
 	lights = mapLights(groupName)
-	print(lights)
 	for light in lights:
 		print("Light: "+light+", state:"+state)
 		if state == 'off':

@@ -1,4 +1,6 @@
 tradfri/*.pyc
 bin/coap-client
 bin/.libs/*
-tradfri.cfg
+*.pyc
+*.cfg
+bulbInfo.txt

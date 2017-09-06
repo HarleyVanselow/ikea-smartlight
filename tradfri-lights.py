@@ -53,7 +53,7 @@ def main(cmdArgs):
 
     hubip = conf.get('tradfri', 'hubip')
     securityid = conf.get('tradfri', 'securityid')
-
+    print("IP:"+ hubip)
     if args.action == 'power':
         if args.value == 'on' or args.value == 'off':
             tradfriActions.tradfri_power_light(hubip, securityid, args.lightbulbid, args.value)
