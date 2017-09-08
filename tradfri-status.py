@@ -32,6 +32,7 @@ import ConfigParser
 from tradfri import tradfriStatus
 from tqdm import tqdm
 
+
 def main():
     """ main function """
     conf = ConfigParser.ConfigParser()
@@ -46,7 +47,7 @@ def main():
     print('[ ] Tradfri: acquiring all Tradfri devices, please wait ...')
     groups = tradfriStatus.tradfri_get_groups(hubip, securityid)
 
-    lightbulb = getBulbInfo(hubip,securityid)
+    lightbulb = getBulbInfo(hubip, securityid)
 
     # sometimes the request are to fast, the will decline the request (flood security)
     # in this case you could increse the sleep timer
@@ -82,25 +83,31 @@ def main():
         else:
             print('group ID: {}, name: {}, state: on'
                   .format(lightgroup[_]["9003"], lightgroup[_]["9001"]))
-def getBulbInfoObject(hubip,securityid):
-	bulbs = getBulbInfo(hubip,securityid)
-	bulbObject = []
-	for bulb in bulbs:
-	   try:
-		bulbProperties = {}
-		bulbProperties['id'] = bulb["9003"]
-		bulbProperties['brightness'] = 0 if bulb["3311"][0]["5850"] == 0 else bulb["3311"][0]["5851"]
-		bulbProperties['name'] = bulb["9001"]
-		bulbObject.append(bulbProperties)
-	   except KeyError:
-		pass
-	return bulbObject
-def getBulbInfo(hubip,securityid):
-	devices = tradfriStatus.tradfri_get_devices(hubip, securityid)
-	lightbulb = []
-	for deviceid in tqdm(range(len(devices)), desc='Tradfri lightbulbs', unit=' lightbulb'):
-	        lightbulb.append(tradfriStatus.tradfri_get_lightbulb(hubip, securityid,str(devices[deviceid])))
-	return lightbulb
+
+
+def getBulbInfoObject(hubip, securityid):
+    bulbs = getBulbInfo(hubip, securityid)
+    bulbObject = []
+    for bulb in bulbs:
+        try:
+            bulbProperties = {}
+            bulbProperties['id'] = bulb["9003"]
+            bulbProperties['brightness'] = 0 if bulb["3311"][0]["5850"] == 0 else bulb["3311"][0]["5851"]
+            bulbProperties['name'] = bulb["9001"]
+            bulbObject.append(bulbProperties)
+        except KeyError:
+            pass
+    return bulbObject
+
+
+def getBulbInfo(hubip, securityid):
+    devices = tradfriStatus.tradfri_get_devices(hubip, securityid)
+    lightbulb = []
+    for deviceid in tqdm(range(len(devices)), desc='Tradfri lightbulbs', unit=' lightbulb'):
+        lightbulb.append(tradfriStatus.tradfri_get_lightbulb(hubip, securityid, str(devices[deviceid])))
+    return lightbulb
+
+
 if __name__ == "__main__":
     main()
     sys.exit(0)
