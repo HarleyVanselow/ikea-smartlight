@@ -29,8 +29,6 @@ the framework also requires `tqdm` for showing progressbars, you could strip it 
 ```
 ./tradfri-status.py
 [ ] tradfri: requireing all tradfri devices, please wait ...
-tradfri lightbulbs: 100%|█████████████████████████████████████████████████████████| 8/8 [00:00<00:00, 10.93 lightbulb/s]
-tradfri groups: 100%|█████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00, 10.50 group/s]
 [+] tradfri: device information gathered
 ===========================================================
 
@@ -48,6 +46,23 @@ groupid: 183216, name: slaapkamer, state: off
 groupid: 140387, name: woonkamer, state: off
 groupid: 186970, name: hal boven, state: off
 ```
+
+### Running the server
+Create a file server.cfg in the project root, following the format described in sampleserver.cfg. Then simply run
+python3 server.py. A webserver will be started on the port you specified that serves light statuses, and can accept
+POST request with JSON in the format
+```
+{
+	"group":"mygroup",
+	"state":"on"
+}
+or
+{
+	"group":"mygroup",
+	"state":"50"
+}
+```
+In the first case, "on" or "off" is accepted, while in the second case a brightness % is accepted
 
 ### todo
 - [X] add change state (power on/off lightbulb)
