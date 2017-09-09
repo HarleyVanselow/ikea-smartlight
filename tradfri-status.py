@@ -27,15 +27,15 @@ from __future__ import print_function
 
 import sys
 import time
-import ConfigParser
+import configparser
+
+import math
 
 from tradfri import tradfriStatus
-from tqdm import tqdm
-
 
 def main():
     """ main function """
-    conf = ConfigParser.ConfigParser()
+    conf = configparser.ConfigParser()
     conf.read('tradfri.cfg')
 
     hubip = conf.get('tradfri', 'hubip')
@@ -53,7 +53,7 @@ def main():
     # in this case you could increse the sleep timer
     time.sleep(.5)
 
-    for groupid in tqdm(range(len(groups)), desc='Tradfri groups', unit=' group'):
+    for groupid in range(len(groups)):
         lightgroup.append(tradfriStatus.tradfri_get_group(hubip, securityid,
                                                           str(groups[groupid])))
 
@@ -92,7 +92,8 @@ def getBulbInfoObject(hubip, securityid):
         try:
             bulbProperties = {}
             bulbProperties['id'] = bulb["9003"]
-            bulbProperties['brightness'] = 0 if bulb["3311"][0]["5850"] == 0 else bulb["3311"][0]["5851"]
+            # Normalize to 0-100 scale for reporting
+            bulbProperties['brightness'] = 0 if bulb["3311"][0]["5850"] == 0 else math.ceil(bulb["3311"][0]["5851"]/2.55)
             bulbProperties['name'] = bulb["9001"]
             bulbObject.append(bulbProperties)
         except KeyError:
@@ -103,7 +104,7 @@ def getBulbInfoObject(hubip, securityid):
 def getBulbInfo(hubip, securityid):
     devices = tradfriStatus.tradfri_get_devices(hubip, securityid)
     lightbulb = []
-    for deviceid in tqdm(range(len(devices)), desc='Tradfri lightbulbs', unit=' lightbulb'):
+    for deviceid in range(len(devices)):
         lightbulb.append(tradfriStatus.tradfri_get_lightbulb(hubip, securityid, str(devices[deviceid])))
     return lightbulb
 

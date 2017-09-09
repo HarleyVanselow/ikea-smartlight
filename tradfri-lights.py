@@ -26,7 +26,7 @@
 from __future__ import print_function
 
 import sys
-import ConfigParser
+import configparser
 import argparse
 
 from tradfri import tradfriActions
@@ -48,12 +48,11 @@ def parse_args(a):
 def main(cmdArgs):
     """ main function """
     args = parse_args(cmdArgs)
-    conf = ConfigParser.ConfigParser()
+    conf = configparser.ConfigParser()
     conf.read('tradfri.cfg')
 
     hubip = conf.get('tradfri', 'hubip')
     securityid = conf.get('tradfri', 'securityid')
-    print("IP:"+ hubip)
     if args.action == 'power':
         if args.value == 'on' or args.value == 'off':
             tradfriActions.tradfri_power_light(hubip, securityid, args.lightbulbid, args.value)

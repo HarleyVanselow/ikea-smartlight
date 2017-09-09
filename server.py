@@ -1,6 +1,9 @@
+import json
 import time
-import BaseHTTPServer
-import simplejson
+from http.server import BaseHTTPRequestHandler,HTTPServer
+from StatusPageBuilder import BasePageBuilder
+from socketserver import ThreadingMixIn
+import threading
 controller = __import__('tradfri-lights')
 status = __import__('tradfri-status')
 
@@ -16,14 +19,7 @@ def mapLights(groupName):
         return lights
 
 
-def printStatusPage(bulbInfo):
-    page = ""
-    for bulb in bulbInfo:
-        page+="<p>"+str(bulb['name'])+": "+str(bulb['brightness'])+"</p><br>"
-    return page
-
-
-def readServerConfig():
+def read_server_config():
     lines = open("server.cfg","r").readlines()
     readMode = ""
     properties = {'group':{},'langmap':{}}
@@ -44,44 +40,32 @@ def readServerConfig():
     return properties
 
 
-class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+
+class MyHandler(BaseHTTPRequestHandler):
     def do_HEAD(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
 
     def do_GET(self):
-        print("Received GET request")
+        self.do_HEAD()
+        self.wfile.write(bytes(BasePageBuilder.build(bulb_statuses), 'UTF-8'))
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write("<html><head><title>Lights Status Page</title></head>")
-        self.wfile.write(printStatusPage(bulb_statuses))
-        print("Done retreiving status")
-        self.send_response(200)
-        self.end_headers()
 
     def do_POST(self):
         """Respond to a GET request."""
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.data_string = self.rfile.read(int(self.headers['Content-Length']))
-        data = simplejson.loads(self.data_string)
-        print(data)
+        self.do_HEAD()
+        data = json.loads(self.rfile.read(int(self.headers['Content-Length'])).decode('utf-8'))
         state = data.get('state')
         groupName = props.get('langmap').get(data.get('group').lower())
-        groups = props.get('group')
         lights = mapLights(groupName)
         # This is a brightness config, that we only want to apply to active lights
         if state.isdigit():
             state = int(state)
-            print("Filtering against "+str([bulb.get('id') for bulb in bulb_statuses if bulb.get('brightness') > 0]))
             lights = [light for light in lights if light in
                       [bulb.get('id') for bulb in bulb_statuses if bulb.get('brightness') > 0]]
-        print("Lights to set: "+str(lights))
+
         for light in lights:
-            print("Light: "+str(light)+", state:"+str(state))
             if state == 'off':
                 controller.main(['-l',str(light), '-a', 'power', '-v',str(state)])
                 [bulb for bulb in bulb_statuses if bulb.get('id') == light][0]['brightness'] = 0
@@ -93,18 +77,22 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 controller.main(['-l',str(light),'-a', 'brightness', '-v',str(state)])
                 [bulb for bulb in bulb_statuses if bulb.get('id') == light][0]['brightness'] = state
 
-props = readServerConfig()
+props = read_server_config()
 hubip = props.get('hubip')
 security_code = props.get('securityid')
-print("Retrieving initial bulb status, hubip: "+str(hubip)+", security code: "+str(security_code))
 bulb_statuses = status.getBulbInfoObject(hubip, security_code)
 HOST_NAME = props.get('HOST_NAME')
 PORT_NUMBER = int(props.get('PORT_NUMBER'))
+
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """ This class allows to handle requests in separated threads.
+        No further content needed, don't touch this. """
+
 if __name__ == '__main__':
-    server_class = BaseHTTPServer.HTTPServer
+    server_class = ThreadedHTTPServer
     httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
     print(time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER))
-    print(props)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

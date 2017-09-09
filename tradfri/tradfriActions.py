@@ -25,6 +25,8 @@
 import sys
 import os
 
+from subprocess import Popen
+
 global coap
 coap = '/usr/local/bin/coap-client'
 
@@ -41,7 +43,7 @@ def tradfri_power_light(hubip, securityid, lightbulbid, value):
                                                                           payload, tradfriHub)
 
     if os.path.exists(coap):
-        os.popen(api)
+        Popen(api, shell=True, stdout=open(os.devnull,'w')).wait()
     else:
         sys.stderr.write('[-] libcoap: could not find libcoap\n')
         sys.exit(1)
@@ -59,7 +61,7 @@ def tradfri_dim_light(hubip, securityid, lightbulbid, value):
                                                                          payload, tradfriHub)
 
     if os.path.exists(coap):
-        result = os.popen(api)
+        result = Popen(api, shell=True, stdout=open(os.devnull, 'w')).wait()
     else:
         sys.stderr.write('[-] libcoap: could not find libcoap\n')
         sys.exit(1)
