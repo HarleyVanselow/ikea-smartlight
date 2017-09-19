@@ -1,5 +1,6 @@
 # ikea-smartlight
 python framework for controlling the Ikea smart lights (tradfri)
+
 An easy setup guide to get the command line controls offered here is available here: http://kuehnast.com/s9y/archives/657-Manage-your-IKEA-TRDFRI-smart-lighting-system-with-Linux.html
 (Note: this is not my article, but it's what got me started working on this project)
 
