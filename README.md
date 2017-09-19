@@ -66,13 +66,7 @@ or
 }
 ```
 In the first case, "on" or "off" is accepted, while in the second case a brightness % is accepted
-
-### todo
-- [X] add change state (power on/off lightbulb)
-- [X] add dimmer value (dimm lightbulb)
-- [X] add change state group (power on/off groups)
-- [X] add dimmer value group (dimm group)
-- [X] add color temperature lightbulb (switch to cold, normal or warm)
+You can also access a light status page by visiting the page in a browser  (localhost:8080, for example)
 
 ### licensing and credits
 ikea-smartlight is licensed under the GPLv3:
