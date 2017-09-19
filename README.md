@@ -1,5 +1,7 @@
 # ikea-smartlight
 python framework for controlling the Ikea smart lights (tradfri)
+An easy setup guide to get the command line controls offered here is available here: http://kuehnast.com/s9y/archives/657-Manage-your-IKEA-TRDFRI-smart-lighting-system-with-Linux.html
+(Note: this is not my article, but it's what got me started working on this project)
 
 ### requirements
 at this moment there is no coap libs with dTLS, the ikea smart lights are using dTLS with coap for security. the only option is to build a new libcoap with dTLS included. libcoap requires `cunit, a2x, doxygen and dot` you need to install these requirements first.
